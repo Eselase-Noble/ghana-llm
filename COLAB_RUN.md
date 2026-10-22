@@ -3,7 +3,7 @@
 Copy each block into a **Colab cell** and run top-to-bottom.
 Runtime first: **Runtime → Change runtime type → T4 GPU → Save.**
 
-Repo: `github.com/Eselase-Noble/ghana-llm` (private)
+Repo: `github.com/Eselase-Noble/ghana-llm` (public — clones with no token)
 Dataset: `gh_v4`
 
 ---
