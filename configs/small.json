@@ -1,0 +1,23 @@
+{
+  "_comment": "Phase-1 seed config: ~10-15M params, CPU-friendly. Tune as corpus grows.",
+  "block_size": 256,
+  "n_layer": 6,
+  "n_head": 6,
+  "n_embd": 384,
+  "dropout": 0.1,
+  "bias": true,
+
+  "batch_size": 32,
+  "grad_accum": 1,
+  "lr": 3e-4,
+  "min_lr": 3e-5,
+  "weight_decay": 0.1,
+  "grad_clip": 1.0,
+  "warmup_steps": 200,
+  "max_steps": 5000,
+
+  "log_every": 20,
+  "eval_every": 250,
+  "eval_iters": 50,
+  "cpu_threads": 8
+}

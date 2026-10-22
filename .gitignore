@@ -1,0 +1,25 @@
+# Python / env
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Logs & process output
+logs/
+*.out
+
+# Checkpoints (large; live on Google Drive, never git)
+checkpoints/
+*.pt
+
+# ALL corpus data stays local / on your Google Drive — NEVER committed.
+# (Contains copyrighted Bible text + scraped data; must not leave the machine via git.)
+corpus/
+
+# Data bundles for Drive upload — contain the corpus; must NEVER be committed.
+*.tar.gz
+*.zip
+ghana-llm-data.tar.gz
+
+# keep empty dir placeholders so the layout exists after clone
+!corpus/.gitkeep

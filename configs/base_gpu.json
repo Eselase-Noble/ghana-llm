@@ -1,0 +1,23 @@
+{
+  "_comment": "TARGET config for a knowledge-capable model (~85M params). Use ONLY once the corpus is large (aim >200M tokens) or it will overfit. Sized for Colab T4/A100; raise grad_accum if OOM.",
+  "block_size": 512,
+  "n_layer": 10,
+  "n_head": 10,
+  "n_embd": 640,
+  "dropout": 0.1,
+  "bias": true,
+
+  "batch_size": 24,
+  "grad_accum": 8,
+  "lr": 6e-4,
+  "min_lr": 6e-5,
+  "weight_decay": 0.1,
+  "grad_clip": 1.0,
+  "warmup_steps": 1000,
+  "max_steps": 60000,
+
+  "log_every": 50,
+  "eval_every": 1000,
+  "eval_iters": 100,
+  "cpu_threads": 8
+}

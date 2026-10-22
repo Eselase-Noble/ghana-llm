@@ -1,0 +1,3 @@
+# Google Colab already ships a CUDA-enabled PyTorch + numpy — do NOT reinstall torch.
+# Only our extra pure-Python dep is needed.
+regex

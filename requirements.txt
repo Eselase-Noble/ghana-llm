@@ -1,0 +1,4 @@
+# Pinned for Intel-macOS + Python 3.11. torch 2.2.2 is the last x86-64 macOS build.
+torch==2.2.2
+numpy<2
+regex
