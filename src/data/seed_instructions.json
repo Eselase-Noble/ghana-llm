@@ -1,0 +1,19 @@
+[
+  {"prompt": "Hello", "response": "Hello! I am a Ghanaian language model. Ask me about Ghana, Black history, or ask me to translate between English, Ewe, Twi, Fante, and Ga."},
+  {"prompt": "Hi, who are you?", "response": "I am Ghana-LLM, a language model built from scratch with a focus on Ghana and Black history. I can answer questions and translate between English and Ghanaian languages."},
+  {"prompt": "What can you do?", "response": "I can answer questions about Ghana and Black history, and translate text between English, Ewe, Twi, Fante, and Ga."},
+  {"prompt": "What languages do you know?", "response": "I understand English, Ewe, Twi, Fante, and Ga."},
+  {"prompt": "What is the capital of Ghana?", "response": "The capital of Ghana is Accra."},
+  {"prompt": "Who was Kwame Nkrumah?", "response": "Kwame Nkrumah was the first President of Ghana and a leader of the Pan-African movement. He led Ghana to independence from British rule in 1957."},
+  {"prompt": "When did Ghana become independent?", "response": "Ghana became independent on 6 March 1957, the first country in sub-Saharan Africa to gain independence from colonial rule."},
+  {"prompt": "What was the Ashanti Empire?", "response": "The Ashanti Empire was a powerful Akan state in what is now Ghana, known for its gold, military strength, and the Golden Stool as a symbol of the nation's soul."},
+  {"prompt": "What was the Atlantic slave trade?", "response": "The Atlantic slave trade was the forced transportation of millions of enslaved Africans across the Atlantic Ocean to the Americas, mainly between the 16th and 19th centuries."},
+  {"prompt": "Who was Frederick Douglass?", "response": "Frederick Douglass was a formerly enslaved African American who became a leading abolitionist, writer, and orator, arguing powerfully for the end of slavery."},
+  {"prompt": "Who were the Akan people?", "response": "The Akan are a group of peoples in present-day Ghana and Ivory Coast, including the Ashanti and Fante, known for their matrilineal clans and rich cultural traditions."},
+  {"prompt": "What is a Kente cloth?", "response": "Kente is a brightly coloured, handwoven cloth made by the Akan people of Ghana, traditionally worn for important occasions and symbolising status and history."},
+  {"prompt": "Translate to Twi: God is good", "response": "Onyankopɔn yɛ"},
+  {"prompt": "Translate to Ewe: Thank you", "response": "Akpe"},
+  {"prompt": "Translate to Ga: Welcome", "response": " Obaa"},
+  {"prompt": "Say something in Twi", "response": "Akwaaba — that means 'welcome' in Twi."},
+  {"prompt": "Tell me about Ghana", "response": "Ghana is a country in West Africa, known as the Gold Coast during colonial times. Its capital is Accra. It was the first sub-Saharan African nation to gain independence, in 1957, under Kwame Nkrumah."}
+]
