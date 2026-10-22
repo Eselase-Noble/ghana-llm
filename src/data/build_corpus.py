@@ -15,7 +15,14 @@ from collections import defaultdict
 ROOT = Path(__file__).resolve().parents[2]
 BIBLE_JSONL = ROOT / "corpus" / "raw" / "bibles" / "bible_parallel.jsonl"
 SCRAPED = ROOT / "corpus" / "raw" / "scraped"
+BOOKS_JSONL = ROOT / "corpus" / "raw" / "books" / "gutenberg.jsonl"
 OUT_DIR = ROOT / "corpus" / "clean"
+
+# Light curation for books: drop colonial-adventure FICTION so a Black-history
+# model isn't trained on imperialist framing / fiction-as-fact. We keep slave
+# narratives, abolitionist works, histories, and factual accounts.
+FICTION_MARKERS = ("fiction",)  # Gutenberg subject tag
+AUTHOR_BLOCKLIST = ("henty",)   # G.A. Henty — colonial adventure novels
 
 LANGS = ["en", "ewe", "twi", "fante", "ga"]
 MIN_PARA = 20  # drop fragments shorter than this many chars
@@ -108,7 +115,42 @@ def build_from_scraped():
         print(f"  wiki_{wiki:3s} {n_art:5d} articles  {n_para:6d} paras  {size/1024:.0f} KB")
 
 
+def build_from_books():
+    """Clean Gutenberg books -> books_gutenberg.txt, with LIGHT curation
+    (drop fiction + colonial-adventure authors)."""
+    if not BOOKS_JSONL.exists():
+        print("(no books jsonl yet; skipping)")
+        return
+    kept = dropped = n_para = 0
+    dropped_titles = []
+    with open(OUT_DIR / "books_gutenberg.txt", "w", encoding="utf-8") as out:
+        for line in open(BOOKS_JSONL, encoding="utf-8"):
+            try:
+                b = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            subjects = " ".join(b.get("subjects", [])).lower()
+            authors = " ".join(b.get("authors", [])).lower()
+            is_fiction = any(m in subjects for m in FICTION_MARKERS)
+            is_blocked = any(a in authors for a in AUTHOR_BLOCKLIST)
+            if is_fiction or is_blocked:
+                dropped += 1
+                dropped_titles.append(b.get("title", "?")[:55])
+                continue
+            kept += 1
+            for para in clean_paras(b.get("text", "")):
+                out.write(para + "\n")
+                n_para += 1
+    size = (OUT_DIR / "books_gutenberg.txt").stat().st_size
+    print(f"Books (light curation): kept {kept}, dropped {dropped} "
+          f"(fiction/colonial) -> {n_para} paras, {size/1024/1024:.1f} MB")
+    for t in dropped_titles:
+        print(f"    dropped: {t}")
+
+
 if __name__ == "__main__":
     build_from_bible()
     print()
     build_from_scraped()
+    print()
+    build_from_books()
