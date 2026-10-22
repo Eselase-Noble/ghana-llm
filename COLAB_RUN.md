@@ -4,7 +4,7 @@ Copy each block into a **Colab cell** and run top-to-bottom.
 Runtime first: **Runtime → Change runtime type → T4 GPU → Save.**
 
 Repo: `github.com/Eselase-Noble/ghana-llm` (private)
-Dataset: `gh_v3`
+Dataset: `gh_v4`
 
 ---
 
@@ -50,8 +50,8 @@ if os.path.islink('corpus') or os.path.isdir('corpus'):
     shutil.rmtree('corpus', ignore_errors=True) if os.path.isdir('corpus') and not os.path.islink('corpus') else os.remove('corpus') if os.path.islink('corpus') else None
 os.symlink(f'{DRIVE}/corpus', 'corpus')
 # checkpoints persist on Drive (survive Colab timeouts)
-CKPT_DIR = f'{DRIVE}/checkpoints/gh_v3'; os.makedirs(CKPT_DIR, exist_ok=True)
-assert os.path.exists('corpus/tokenized/gh_v3/train.bin'), "data not found — upload the bundle to Drive first"
+CKPT_DIR = f'{DRIVE}/checkpoints/gh_v4'; os.makedirs(CKPT_DIR, exist_ok=True)
+assert os.path.exists('corpus/tokenized/gh_v4/train.bin'), "data not found — upload the bundle to Drive first"
 print("data + checkpoints ready")
 ```
 
@@ -59,7 +59,7 @@ print("data + checkpoints ready")
 ```python
 !python src/train/train.py \
     --config configs/gpu.json \
-    --dataset gh_v3 \
+    --dataset gh_v4 \
     --device cuda \
     --ckpt-dir "$CKPT_DIR" \
     --resume
@@ -69,7 +69,7 @@ Bigger model later (needs a much larger corpus): swap `configs/gpu.json` →
 
 ## 5) Sample from the model
 ```python
-!python src/generate/sample.py --dataset gh_v3 --device cuda \
+!python src/generate/sample.py --dataset gh_v4 --device cuda \
     --ckpt "$CKPT_DIR/ckpt.pt" --prompt "Ghana" --tokens 150 --temperature 0.8 --top-k 50
 ```
 
