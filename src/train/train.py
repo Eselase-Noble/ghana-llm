@@ -122,27 +122,45 @@ def main():
     log_path = ROOT / "logs" / f"{args.dataset}.log"
     log_path.parent.mkdir(exist_ok=True)
 
+    tmp_path = ckpt_dir / "ckpt.pt.tmp"
+    bak_path = ckpt_dir / "ckpt.pt.bak"
+
     start_step = 0
     best_val = float("inf")
-    if args.resume and ckpt_path.exists():
-        ck = torch.load(ckpt_path, map_location=device)
-        model.load_state_dict(ck["model"])
-        opt.load_state_dict(ck["opt"])
-        start_step = ck["step"]
-        best_val = ck.get("best_val", best_val)
-        if scaler and ck.get("scaler"):
-            scaler.load_state_dict(ck["scaler"])
-        print(f"Resumed from step {start_step} (best_val {best_val:.4f})")
+    if args.resume:
+        # Try the live checkpoint first, then the previous-good backup. A session
+        # that died mid-save can leave ckpt.pt truncated; .bak is then intact.
+        for cand in (ckpt_path, bak_path):
+            if not cand.exists():
+                continue
+            try:
+                ck = torch.load(cand, map_location=device)
+                model.load_state_dict(ck["model"])
+                opt.load_state_dict(ck["opt"])
+                start_step = ck["step"]
+                best_val = ck.get("best_val", best_val)
+                if scaler and ck.get("scaler"):
+                    scaler.load_state_dict(ck["scaler"])
+                print(f"Resumed from {cand.name} at step {start_step} (best_val {best_val:.4f})")
+                break
+            except Exception as e:
+                print(f"WARN: {cand.name} unreadable ({e}); trying next candidate")
 
     B = cfg["batch_size"]; T = cfg["block_size"]
     accum = cfg.get("grad_accum", 1)
     max_steps = cfg["max_steps"]
 
     def save(step):
+        # Atomic + backup: write to a temp file, promote the current checkpoint to
+        # .bak, then rename temp into place. A crash at any point leaves either the
+        # last good ckpt.pt or an intact .bak — never a half-written primary.
         torch.save({"model": model.state_dict(), "opt": opt.state_dict(),
                     "step": step, "best_val": best_val, "config": cfg,
                     "model_config": mcfg.__dict__,
-                    "scaler": scaler.state_dict() if scaler else None}, ckpt_path)
+                    "scaler": scaler.state_dict() if scaler else None}, tmp_path)
+        if ckpt_path.exists():
+            os.replace(ckpt_path, bak_path)
+        os.replace(tmp_path, ckpt_path)
 
     t0 = time.time()
     model.train()
