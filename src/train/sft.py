@@ -72,6 +72,8 @@ def main():
     ap.add_argument("--out", default="", help="output SFT checkpoint path")
     ap.add_argument("--device", default="auto")
     ap.add_argument("--epochs", type=int, default=3)
+    ap.add_argument("--resume", action="store_true",
+                    help="continue from a partially-finished sft.pt (e.g. after a Colab drop)")
     ap.add_argument("--batch-size", type=int, default=16)
     ap.add_argument("--lr", type=float, default=1e-4)
     args = ap.parse_args()
@@ -101,6 +103,8 @@ def main():
 
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.95), weight_decay=0.0)
     out_path = Path(args.out) if args.out else (ROOT / "checkpoints" / args.dataset / "sft.pt")
+    tmp_path = out_path.with_name(out_path.name + ".tmp")
+    bak_path = out_path.with_name(out_path.name + ".bak")
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     rng = random.Random(1337)
@@ -109,10 +113,41 @@ def main():
     total_steps = steps_per_epoch * args.epochs
     warmup = min(50, total_steps // 20 + 1)
     step = 0
+    start_epoch = 0
+    if args.resume:
+        # Pick up a half-finished SFT run: load model+opt and skip completed epochs.
+        for cand in (out_path, bak_path):
+            if not cand.exists():
+                continue
+            try:
+                rc = torch.load(cand, map_location=device)
+                model.load_state_dict(rc["model"])
+                if rc.get("opt"):
+                    opt.load_state_dict(rc["opt"])
+                start_epoch = rc.get("epoch", 0)
+                step = rc.get("step", start_epoch * steps_per_epoch)
+                print(f"Resumed SFT from {cand.name}: {start_epoch}/{args.epochs} epochs done")
+                break
+            except Exception as e:
+                print(f"WARN: {cand.name} unreadable ({e}); trying next candidate")
+
+    def save_sft(epoch_done, step_done):
+        # Atomic + backup, same contract as pretraining: a crash never corrupts the
+        # only copy. Stores opt+step so --resume can continue mid-run.
+        torch.save({"model": model.state_dict(), "model_config": mcfg.__dict__,
+                    "chat_format": {"user_pre": USER_PRE, "asst_pre": ASST_PRE},
+                    "opt": opt.state_dict(), "epoch": epoch_done, "step": step_done},
+                   tmp_path)
+        if out_path.exists():
+            os.replace(out_path, bak_path)
+        os.replace(tmp_path, out_path)
+
     model.train()
     t0 = time.time()
     for epoch in range(args.epochs):
-        rng.shuffle(order)
+        rng.shuffle(order)  # advance rng each epoch so a resumed run keeps the schedule moving
+        if epoch < start_epoch:
+            continue
         for bi in range(0, len(order), args.batch_size):
             idxs = order[bi:bi + args.batch_size]
             X, Y = make_batch(examples, idxs, pad_id, device)
@@ -133,9 +168,7 @@ def main():
                 print(f"epoch {epoch} step {step}/{total_steps} loss {loss.item():.4f} "
                       f"lr {lr:.2e} {time.time()-t0:.0f}s", flush=True)
             step += 1
-        torch.save({"model": model.state_dict(), "model_config": mcfg.__dict__,
-                    "chat_format": {"user_pre": USER_PRE, "asst_pre": ASST_PRE},
-                    "epoch": epoch + 1}, out_path)
+        save_sft(epoch + 1, step)
         print(f"saved {out_path} after epoch {epoch+1}", flush=True)
     print("SFT done.")
 
